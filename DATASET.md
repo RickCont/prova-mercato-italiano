@@ -94,10 +94,10 @@ Le variazioni si calcolano **sempre** su `chiusura_agg`; il controvalore **sempr
 
 | Colonna | Copertura | p1 / mediana / p99 |
 |---|---|---|
-| `var_1g` | 100 % | −0,051 / 0 / +0,053 |
-| `var_5g` | 99,9 % | −0,113 / 0 / +0,122 |
-| `var_20g` | 99,7 % | −0,235 / +0,001 / +0,272 |
-| `var_60g` | 98,9 % | −0,398 / +0,003 / +0,516 |
+| `var_1g` | 100 % | −0,064 / 0 / +0,077 |
+| `var_5g` | 99,8 % | −0,141 / 0 / +0,176 |
+| `var_20g` | 99,3 % | −0,275 / 0 / +0,362 |
+| `var_60g` | 97,9 % | −0,433 / 0 / +0,664 |
 | `var_252g` | 91,4 % | −0,715 / +0,004 / +1,769 |
 
 Frazioni, non percentuali: `−0,10` significa −10 %.
@@ -171,8 +171,8 @@ questo universo.
 | `sedute_scambiate_20g` | 99,7 % | 0 / 20 / 20 | Quante delle ultime 20 sedute hanno avuto volume > 0 |
 | `volume_relativo` | 98,4 % | 0 / 0,75 / 6,33 | Volume del giorno diviso la media a 20 giorni |
 
-**Perché contano.** Su 40 blue chip la liquidità non era un problema; qui **110 titoli
-su 406 scambiano meno di 10.000 € al giorno** e 135 hanno almeno il 10 % delle sedute a
+**Perché contano.** Su 40 blue chip la liquidità non era un problema; qui **154 titoli
+su 404 scambiano meno di 10.000 € al giorno** e 152 hanno almeno il 10 % delle sedute a
 volume zero. Un prezzo fermo produce **finto ritorno alla media**: la "caduta" del
 giorno X è spesso la stampa arretrata di una discesa già avvenuta, e il "recupero" del
 giorno dopo è meccanico. È il rischio numero uno di qualunque analisi su questo
@@ -224,8 +224,8 @@ Colonne che confrontano i titoli **fra loro dentro la stessa giornata**.
 | `pct_dal_massimo_52s` | 55,2 % | Idem sulla distanza dal massimo |
 | `pct_var_5g_in_atr` | 55,2 % | Idem sulla caduta normalizzata per volatilità |
 | `pct_rendimento_dividendo_12m` | 55,2 % | Idem sul rendimento da dividendo |
-| `var_5g_rel` | 99,9 % | `var_5g` meno la mediana dei titoli eleggibili quel giorno |
-| `var_20g_rel` | 99,7 % | Idem su 20 giorni |
+| `var_5g_rel` | 99,0 % | `var_5g` meno la mediana dei titoli eleggibili quel giorno |
+| `var_20g_rel` | 98,5 % | Idem su 20 giorni |
 
 I `pct_*` sono definiti **solo sulle righe eleggibili**: includere i titoli fermi
 falserebbe i percentili, perché un prezzo che non si muove finirebbe sempre a metà
@@ -234,7 +234,11 @@ volutamente più larga di quella operativa consigliata (100.000 €).
 
 I `var_*_rel` invece sono definiti su **tutte** le righe: la mediana è una sola per
 giornata, e servono anche sui titoli illiquidi, che sono l'oggetto del test di
-robustezza.
+robustezza. La copertura non arriva al 100 % perché in 9.669 righe — di cui 7.030 nel
+solo 2000, più una coda fino al 2005 — **nessun titolo era eleggibile quel giorno**, e
+senza titoli eleggibili la mediana trasversale non esiste. È lo stesso problema
+dell'ampiezza dell'universo visto da un'altra angolatura: all'inizio del campione non
+c'è abbastanza mercato per fare un confronto trasversale.
 
 Il confronto usa la mediana dei titoli eleggibili e **non** l'indice, perché
 `FTSEMIB.MI` è un indice *price* mentre i nostri prezzi sono total return: sottrarlo
@@ -347,7 +351,7 @@ in modo invisibile. La colonna `controvalore_medio_20g` è già calcolata bene.
 rendimenti da dividendo arrivano al 13 % (99° percentile), significa buttare via la
 maggior parte del rendimento — e reintrodurre i falsi crolli nei giorni di stacco.
 
-**Non filtrare per prezzo minimo a 1,00 €.** Su Milano **92 titoli su 389 quotano sotto
+**Non filtrare per prezzo minimo a 1,00 €.** Su Milano **90 titoli su 404 quotano sotto
 1 €**, fra cui TESMEC (1,6 M€/giorno di scambi), CIR, RCS Mediagroup, IMMSI e GEOX. Il
 prezzo unitario basso non dice niente sulla qualità: il proxy giusto di investibilità è
 il controvalore. La soglia a 0,10 € serve solo a escludere i casi dove il tick è già
@@ -376,10 +380,10 @@ finire per sbaglio in una colonna del pannello. Le sole ragionevolmente stabili 
 `settore` e `industria` (402 titoli su 406 coperti).
 
 **Non ignorare i costi di transazione.** Misurati su tutti i 406 titoli, lo spread
-denaro-lettera va dallo 0,05 % dei 42 titoli sopra i 10 M€/giorno al **2,84 %** mediano
-(8,43 % al 90° percentile) dei 110 sotto i 10.000 €/giorno. Con un take profit del
-10 %, nella fascia 10-50k il giro completo si mangia il 19 % del guadagno e per un
-titolo su dieci il 45 %. Una commissione piatta uguale per tutti è sbagliata per metà
+denaro-lettera va dallo 0,05 % dei 42 titoli sopra i 10 M€/giorno al **3,21 %** mediano
+(16,6 % al 90° percentile) dei 154 sotto i 10.000 €/giorno. Con un take profit del
+10 %, nella fascia 10-50k il giro completo si mangia il 19 % del guadagno, e nella
+fascia sotto i 10k il titolo mediano se lo mangia per un terzo. Una commissione piatta uguale per tutti è sbagliata per metà
 dell'universo: `anagrafica.costo_per_fascia()` produce la tabella di calibrazione.
 
 ## Cosa il dataset non contiene, e perché

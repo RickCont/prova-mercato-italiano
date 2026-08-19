@@ -143,7 +143,7 @@ In grassetto le colonne nuove rispetto alla versione FTSE MIB. Sono tutte impost
 dal passaggio da 40 a 400 titoli:
 
 **Liquidità.** Su 40 blue chip non era un problema; su 400 titoli 108 scambiano
-meno di 10.000 € al giorno e 135 hanno almeno il 10% delle sedute a volume zero. Un
+meno di 10.000 € al giorno e 152 hanno almeno il 10% delle sedute a volume zero. Un
 prezzo fermo produce **finto ritorno alla media**: la "caduta" del giorno X è spesso
 la stampa arretrata di una discesa già avvenuta, e il "recupero" del giorno dopo è
 meccanico. È il rischio numero uno di tutto l'esercizio.
@@ -197,11 +197,11 @@ produce **14.423 segnali** contro i 5.052 del dataset FTSE MIB.
 | `sedute_di_storia ≥ 252` | un anno | Stagionatura post-IPO. I primi 6-12 mesi sono un regime di prezzo diverso: stabilizzazione del collocatore, scadenza del lock-up, flottante minimo. Copre anche il warm-up degli indicatori |
 | `controvalore_medio_20g ≥ 100.000` | € al giorno | Lascia ~149 titoli oggi. Sotto, lo spread mangia l'edge |
 | `sedute_scambiate_20g ≥ 18` | su 20 | Elimina l'artefatto dei prezzi fermi |
-| prezzo minimo | 0,10 € — **non 1,00** | Su Milano 92 titoli su 389 quotano sotto 1 €, fra cui TESMEC (1,6 M€/giorno), CIR, RCS, IMMSI, GEOX. Il prezzo unitario basso non dice niente sulla qualità: il proxy giusto è il controvalore. La soglia a 0,10 serve solo a escludere i casi dove il tick è già l'1% del prezzo |
+| prezzo minimo | 0,10 € — **non 1,00** | Su Milano 90 titoli su 404 quotano sotto 1 €, fra cui TESMEC (1,6 M€/giorno), CIR, RCS, IMMSI, GEOX. Il prezzo unitario basso non dice niente sulla qualità: il proxy giusto è il controvalore. La soglia a 0,10 serve solo a escludere i casi dove il tick è già l'1% del prezzo |
 
 ## I costi di transazione
 
-Spread denaro-lettera misurato su tutti i 406 titoli (`anagrafica.py`):
+Spread denaro-lettera misurato su tutti i 404 titoli del pannello (`anagrafica.py`):
 
 | Controvalore mediano/giorno | Titoli | Spread mediano | 90° percentile |
 |---|---|---|---|
@@ -210,13 +210,14 @@ Spread denaro-lettera misurato su tutti i 406 titoli (`anagrafica.py`):
 | 200k – 1 M | 42 | 0,43 % | 0,80 % |
 | 50k – 200k | 40 | 0,57 % | 1,68 % |
 | 10k – 50k | 80 | 1,86 % | 4,52 % |
-| < 10k | 110 | **2,84 %** | **8,43 %** |
+| < 10k | 154 | **3,21 %** | **16,6 %** |
 
 Casi estremi nella stessa borsa: ENI 0,05 %, CLABO **34 %** (denaro 0,95 / lettera
 1,34). Con un take profit del 10%, nella fascia 10-50k il giro completo si mangia il
-19% del guadagno e per un titolo su dieci il 45%; sotto i 10k non è replicabile
-affatto. **190 titoli su 406 stanno sotto i 50.000 € al giorno.** Una commissione
-piatta uguale per tutti è sbagliata per metà dell'universo:
+19% del guadagno e per un titolo su dieci il 45%; sotto i 10k il titolo mediano se lo
+mangia per un terzo e non è replicabile affatto. **234 titoli su 404 stanno sotto i
+50.000 € al giorno.** Una commissione piatta uguale per tutti è sbagliata per metà
+dell'universo:
 `anagrafica.costo_per_fascia()` produce la tabella di calibrazione.
 
 ## Il benchmark

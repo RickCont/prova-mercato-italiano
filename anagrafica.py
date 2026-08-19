@@ -104,7 +104,11 @@ def costo_per_fascia(anagrafica: pd.DataFrame, pannello_liquidita: pd.DataFrame)
     fasce = [0, 1e4, 5e4, 2e5, 1e6, 1e7, 1e12]
     etichette = ["<10k", "10-50k", "50-200k", "200k-1M", "1-10M", ">10M"]
     m = anagrafica.merge(pannello_liquidita, on="ticker", how="inner")
-    m["fascia"] = pd.cut(m.controvalore_medio_20g, fasce, labels=etichette)
+    # include_lowest: senza questo i titoli con controvalore esattamente 0 cadono
+    # fuori dal primo intervallo e spariscono dalla tabella. Sono 44 titoli, e sono
+    # i piu' illiquidi del listino: esattamente quelli che la tabella deve mostrare.
+    m["fascia"] = pd.cut(m.controvalore_medio_20g, fasce, labels=etichette,
+                         include_lowest=True)
     out = m.groupby("fascia", observed=True).agg(
         titoli=("ticker", "size"),
         spread_mediano=("spread_pct", "median"),
