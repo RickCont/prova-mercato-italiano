@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+# I dati si rigenerano: il pannello sfiora i 100 MB e non va in repo.
+dati/*.csv.gz
+dati/log_*.txt
