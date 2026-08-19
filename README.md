@@ -11,6 +11,16 @@ da verificare qui è se **dieci volte più titoli** producano abbastanza segnali
 distinguere il caso dall'effetto — sapendo che l'universo largo porta con sé
 problemi che su 40 blue chip non esistevano.
 
+Stato: **il dataset è finito e validato** — 1.151.784 righe su 404 titoli, 54 colonne.
+Il backtest non è ancora stato fatto.
+
+| Documento | Cosa contiene |
+|---|---|
+| questo file | le scelte di progetto e il perché |
+| [DATASET.md](DATASET.md) | dizionario dei dati: ogni colonna, copertura, e cosa non fare col dataset |
+| [PROSSIMI_PASSI.md](PROSSIMI_PASSI.md) | cosa resta da fare, in ordine, e le questioni aperte |
+| [da_riscrivere/README.md](da_riscrivere/README.md) | il motore di backtest del progetto precedente e cosa cambiargli |
+
 ## I tre passaggi
 
 ```bash
@@ -235,6 +245,58 @@ ETF FTSE MIB total return    +4,16% annuo   dal 2008-01-02
 **2,4 punti l'anno** di differenza, e sono al netto del TER dell'ETF. Serve comunque
 anche un benchmark equipesato costruito sugli stessi titoli della strategia, perché
 l'ETF non ha survivorship bias mentre il nostro universo sì.
+
+## Cosa non è su git, e come si rigenera
+
+Nel repo ci sono **solo il codice e i file di anagrafica piccoli**. I dati veri sono
+esclusi da `.gitignore`, sia perché si rigenerano sia perché GitHub rifiuta i file
+sopra i 100 MB.
+
+| File | Peso | Come si rigenera | Serve copiarlo a mano? |
+|---|---|---|---|
+| `dati/pannello_italia.csv.gz` | **178 MB** | `python costruisci_dataset.py` | No, ma rigenerarlo richiede ~11 min |
+| `dati/prezzi_grezzi.csv.gz` | **35 MB** | idem, è la cache dello scarico | **Conviene**: se c'è, salta lo scarico da Yahoo |
+| `dati/indice_ftsemib.csv.gz` | 124 KB | idem | No |
+| `dati/log_costruzione.txt` | 8 KB | idem | No, ma contiene l'elenco delle 57 serie accorciate |
+| `dati/log_anagrafica.txt` | 4 KB | `python anagrafica.py` | No |
+| `__pycache__/` | | automatico | No |
+
+**Se sposti il progetto su un'altra macchina**, l'unico file che vale la pena portarsi
+è `dati/prezzi_grezzi.csv.gz`: è la cache dei prezzi grezzi, e averla evita di
+riscaricare 406 ticker da Yahoo. Tutto il resto si ricostruisce da quella. Senza di
+essa funziona comunque, ci mette un minuto e mezzo in più.
+
+Attenzione a un punto: `dati/anagrafica.csv` **è** tracciato, ma è una fotografia del
+19 agosto 2026 — capitalizzazione, denaro/lettera, settore. Lo spread invecchia: se lo
+usi per calibrare i costi molto dopo, rilancia `python anagrafica.py`.
+
+### Tempi reali dell'ultima esecuzione completa
+
+```
+universo.py            ~90 s   Euronext + validazione dei 406 ticker su Yahoo
+scarico prezzi         ~95 s   406 ticker, 11 blocchi da 40
+pulizia                 ~5 s
+indicatori             ~35 s
+scrittura del CSV     ~3,5 min <- il collo di bottiglia
+anagrafica.py          ~4,5 min 406 chiamate .info, una per titolo
+```
+
+### L'ambiente Python
+
+Il progetto **non ha un virtualenv proprio**: finora ha usato quello del progetto
+precedente (`../azioni-borsa/.venv`). È una dipendenza da non lasciare in piedi. Per
+crearne uno dedicato:
+
+```bash
+cd borsa-italiana
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
+
+Le versioni con cui il dataset è stato costruito: Python 3.9, pandas 2.3.3,
+numpy 2.0.2, **yfinance 1.2.0**. Quest'ultima conta: le API di yfinance cambiano
+spesso, e `auto_adjust=False, actions=True` con `group_by="ticker"` è il
+comportamento verificato su questa versione.
 
 ## Limiti dichiarati
 
